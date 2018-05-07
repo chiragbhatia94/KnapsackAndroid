@@ -2,10 +2,9 @@ package com.chiragbhatia.scimataknapsack;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -19,13 +18,14 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
 public class ProblemSolutionActivity extends AppCompatActivity {
 
-    private static final String TAG = "PRO";
+    private static final String TAG = "ProblemSolutionActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,38 +58,56 @@ public class ProblemSolutionActivity extends AppCompatActivity {
                     Toast.makeText(ProblemSolutionActivity.this, R.string.enter_valid_no_of_items, Toast.LENGTH_LONG).show();
                     return;
                 }
-                int items = Integer.parseInt(itemString);
-                if (items < 1) {
+                int noOfItems = Integer.parseInt(itemString);
+                if (noOfItems < 1) {
                     Toast.makeText(ProblemSolutionActivity.this, R.string.enter_valid_no_of_items, Toast.LENGTH_LONG).show();
                     return;
                 }
-                for (int i = 1; i <= items; i++) {
-                    Random random = new Random();
-                    int randomWeight = 1 + random.nextInt(10);
-                    int randomValue = 1 + random.nextInt(10);
 
-                    itemsMap.put(randomWeight, randomValue);
-                    itemStrings.add(getString(R.string.item) + " " + i + ": Weight(" + randomWeight + ") Value(" + randomValue + ")");
+                int[] values = new int[noOfItems];
+                int[] weights = new int[noOfItems];
+                int[][] S;
+
+                boolean runRandom = true;
+
+                if (runRandom)
+                    for (int i = 0; i < noOfItems; i++) {
+                        Random random = new Random();
+                        int randomWeight = 1 + random.nextInt(capacity);
+                        int randomValue = 1 + random.nextInt(10);
+
+                        weights[i] = randomWeight;
+                        values[i] = randomValue;
+
+                        itemStrings.add(getString(R.string.item) + " " + i + ": Weight(" + randomWeight + ") Value(" + randomValue + ")");
+                    }
+                else {
+                    // this is just for testing
+                    noOfItems = 3;
+                    capacity = 5;
+                    weights = new int[]{4, 2, 3};
+                    values = new int[]{10, 4, 7};
                 }
+
+                System.out.println("Weights: " + Arrays.toString(weights));
+                System.out.println("Values: " + Arrays.toString(values));
+
+                S = solveKnapsack(weights, values, noOfItems, capacity);
+                System.out.println("Total Benefit: " + S[noOfItems][capacity]);
+
+                int[] selected = findItemsToTake(weights, noOfItems, capacity, S);
+                System.out.println(Arrays.toString(selected));
+
                 generateRandomInputsButton.setVisibility(View.GONE);
                 addManualInputsButton.setVisibility(View.GONE);
                 capacityET.setEnabled(false);
                 itemsET.setEnabled(false);
 
+                System.out.println(itemStrings);
+
                 itemsListView.setAdapter(new ArrayAdapter<String>(ProblemSolutionActivity.this, android.R.layout.simple_list_item_1, itemStrings));
 
-                int wt[] = new int[items];
-                int vt[] = new int[items];
-                int k = 0;
-                for (Map.Entry<Integer, Integer> entry : itemsMap.entrySet()) {
-                    wt[k] = entry.getKey();
-                    vt[k] = entry.getValue();
-                    k++;
-                }
-
-                int maxProfit = knapsack(capacity, wt, vt, items);
-                System.out.println(maxProfit);
-                Toast.makeText(ProblemSolutionActivity.this, "Max profit will be " + maxProfit, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProblemSolutionActivity.this, "Max profit will be " + S[noOfItems][capacity] + "\n" + Arrays.toString(selected), Toast.LENGTH_SHORT).show();
             }
 
         });
@@ -109,16 +127,17 @@ public class ProblemSolutionActivity extends AppCompatActivity {
                     Toast.makeText(ProblemSolutionActivity.this, R.string.enter_valid_no_of_items, Toast.LENGTH_LONG).show();
                     return;
                 }
-                final int items = Integer.parseInt(itemString);
-                if (items < 1) {
+                final int noOfItems = Integer.parseInt(itemString);
+                if (noOfItems < 1) {
                     Toast.makeText(ProblemSolutionActivity.this, R.string.enter_valid_no_of_items, Toast.LENGTH_LONG).show();
                     return;
                 }
 
+                Log.i(TAG, "onClick: " + noOfItems);
 
-                Log.i(TAG, "onClick: " + items);
+                final Temp t = new Temp(noOfItems);
 
-                for (int i = 1; i <= items; i++) {
+                for (int i = 1; i <= noOfItems; i++) {
                     Context context = addManualInputsButton.getContext();
                     LinearLayout layout = new LinearLayout(context);
                     layout.setOrientation(LinearLayout.VERTICAL);
@@ -149,17 +168,7 @@ public class ProblemSolutionActivity extends AppCompatActivity {
                                     itemsMap.put(weight, value);
                                     itemStrings.add(getString(R.string.item) + " " + temp + ": Weight(" + weight + ") Value(" + value + ")");
 
-                                    int wt[] = new int[items];
-                                    int vt[] = new int[items];
-                                    int k = 0;
-                                    for (Map.Entry<Integer, Integer> entry : itemsMap.entrySet()) {
-                                        wt[k] = entry.getKey();
-                                        vt[k] = entry.getValue();
-                                        k++;
-                                    }
-                                    int maxProfit = knapsack(capacity, wt, vt, items);
-                                    System.out.println(maxProfit);
-                                    Toast.makeText(ProblemSolutionActivity.this, "Max profit will be " + maxProfit, Toast.LENGTH_SHORT).show();
+                                    t.subA();
                                 }
                             })
                             .setView(layout)
@@ -207,13 +216,49 @@ public class ProblemSolutionActivity extends AppCompatActivity {
                         }
                     });
 
+                    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            if (t.getA() == 0) {
+                                System.out.println("This was fun");
+                                int weights[] = new int[noOfItems];
+                                int values[] = new int[noOfItems];
+                                int[][] S;
+                                int k = 0;
+                                for (Map.Entry<Integer, Integer> entry : itemsMap.entrySet()) {
+                                    weights[k] = entry.getKey();
+                                    values[k] = entry.getValue();
+                                    k++;
+                                }
+
+                                System.out.println("NoOfItems: " + noOfItems);
+                                System.out.println("Capacity: " + capacity);
+                                System.out.println("Weights: " + Arrays.toString(weights));
+                                System.out.println("Values : " + Arrays.toString(values));
+
+                                // here perform knapsack solution
+
+                                System.out.println("Weights: " + Arrays.toString(weights));
+                                System.out.println("Values: " + Arrays.toString(values));
+
+                                S = solveKnapsack(weights, values, noOfItems, capacity);
+                                System.out.println("Total Benefit: " + S[noOfItems][capacity]);
+
+                                int[] selected = findItemsToTake(weights, noOfItems, capacity, S);
+
+                                Toast.makeText(ProblemSolutionActivity.this, "Max profit will be " + S[noOfItems][capacity] + "\n" + Arrays.toString(selected), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
                     dialog.show();
+
                     // The buttons are initially deactivated, as the fields are initially empty:
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
                     valueBox.setEnabled(false);
                 }
 
-                itemsListView.setAdapter(new ArrayAdapter<String>(ProblemSolutionActivity.this, android.R.layout.simple_list_item_1, itemStrings));
+                itemsListView.setAdapter(new ArrayAdapter<>(ProblemSolutionActivity.this, android.R.layout.simple_list_item_1, itemStrings));
                 generateRandomInputsButton.setVisibility(View.GONE);
                 addManualInputsButton.setVisibility(View.GONE);
                 capacityET.setEnabled(false);
@@ -222,29 +267,61 @@ public class ProblemSolutionActivity extends AppCompatActivity {
         });
     }
 
-    // A utility function that returns maximum of two integers
-    static int max(int a, int b) {
-        return (a > b) ? a : b;
-    }
-
-    // Returns the maximum value that can be put in a knapsack of capacity W
-    static int knapsack(int W, int wt[], int val[], int n) {
-        int i, w;
-        int V[][] = new int[n + 1][W + 1];
-
-        // Build table V[][] in bottom up manner
-        for (i = 0; i <= n; i++) {
-            for (w = 0; w <= W; w++) {
-                if (i == 0 || w == 0) {
-                    V[i][w] = 0;
-                } else if (wt[i - 1] <= w) {
-                    V[i][w] = max(val[i - 1] + V[i - 1][w - wt[i - 1]], V[i - 1][w]);
-                } else {
-                    V[i][w] = V[i - 1][w];
-                }
+    public static int[][] solveKnapsack(int wi[], int vi[], int n, int W) {
+        int S[][] = new int[n + 1][W + 1];
+        for (int i = 1; i <= n; i++) {
+            for (int w = 1; w <= W; w++) {
+                if (w - wi[i - 1] >= 0)
+                    S[i][w] = Math.max(S[i - 1][w], vi[i - 1] + S[i - 1][w - wi[i - 1]]);
+                else
+                    S[i][w] = S[i - 1][w];
             }
         }
 
-        return V[n][W];
+        System.out.println("S: w");
+        System.out.println("i");
+
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= W; j++) {
+                System.out.print(S[i][j] + "\t");
+            }
+            System.out.println();
+        }
+        return S;
+    }
+
+    public static int[] findItemsToTake(int wi[], int noOfItems, int capacity, int S[][]) {
+        int selected[] = new int[noOfItems];
+
+        for (int n = noOfItems, w = capacity; n > 0; n--) {
+            if (S[n][w] != 0 && S[n][w] != S[n - 1][w]) {
+                // System.out.println("We select item no: " + n);
+                selected[n - 1] = 1;
+                w = w - wi[n - 1];
+            }
+        }
+
+        return selected;
+    }
+
+    class Temp {
+        private int a;
+
+        Temp(int noOfTimes) {
+            a = noOfTimes;
+        }
+
+        public int getA() {
+            return a;
+        }
+
+        public void subA() {
+            this.a--;
+            System.out.println("subing a");
+        }
+
+        public void setA(int a) {
+            this.a = a;
+        }
     }
 }
