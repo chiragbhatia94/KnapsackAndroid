@@ -26,6 +26,7 @@
         <activity
             android:name=".ProblemSolutionActivity"
             android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity android:name=".ResultsActivity"></activity>
     </application>
 
 </manifest>

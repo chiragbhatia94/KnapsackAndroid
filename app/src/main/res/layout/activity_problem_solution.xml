@@ -23,9 +23,9 @@
         android:id="@+id/capacityET"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="@string/forty_five"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:hint="@string/forty_five"
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView1"
@@ -48,9 +48,9 @@
         android:id="@+id/itemsET"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="@string/five"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:hint="@string/five"
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView2"
@@ -88,7 +88,24 @@
     <ListView
         android:id="@+id/itemsListView"
         android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/showDetailResultsButton"
+        app:layout_constraintTop_toBottomOf="@+id/addManualInputsButton" />
+
+    <Button
+        android:id="@+id/showDetailResultsButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/addManualInputsButton">
-    </ListView></android.support.constraint.ConstraintLayout>
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:onClick="showDetailedResult"
+        android:layout_marginStart="8dp"
+        android:text="@string/show_detailed_results"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</android.support.constraint.ConstraintLayout>

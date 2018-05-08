@@ -31,4 +31,7 @@
     <string name="item">Item</string>
     <string name="weight">Weight</string>
     <string name="value">Value</string>
+    <string name="show_detailed_results">Show Detailed Results</string>
+    <string name="following_items_will_be_selected">Following items will be selected</string>
+    <string name="final_weight_xyz_value_pqr">Final Weight = xyz value = pqr</string>
 </resources>

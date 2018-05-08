@@ -2,6 +2,7 @@ package com.chiragbhatia.scimataknapsack;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,8 @@ public class ProblemSolutionActivity extends AppCompatActivity {
 
     private static final String TAG = "ProblemSolutionActivity";
 
+    final Bundle bundle = new Bundle();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,11 +40,14 @@ public class ProblemSolutionActivity extends AppCompatActivity {
 
         final Button generateRandomInputsButton = findViewById(R.id.generateRandomInputsButton);
         final Button addManualInputsButton = findViewById(R.id.addManualInputsButton);
+        final Button showDetailResultsButton = findViewById(R.id.showDetailResultsButton);
 
         final ListView itemsListView = findViewById(R.id.itemsListView);
 
         final LinkedHashMap<Integer, Integer> itemsMap = new LinkedHashMap<>();
         final ArrayList<String> itemStrings = new ArrayList<>();
+
+        showDetailResultsButton.setVisibility(View.GONE);
 
         generateRandomInputsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,6 +106,8 @@ public class ProblemSolutionActivity extends AppCompatActivity {
 
                 generateRandomInputsButton.setVisibility(View.GONE);
                 addManualInputsButton.setVisibility(View.GONE);
+                showDetailResultsButton.setVisibility(View.VISIBLE);
+
                 capacityET.setEnabled(false);
                 itemsET.setEnabled(false);
 
@@ -108,8 +116,13 @@ public class ProblemSolutionActivity extends AppCompatActivity {
                 itemsListView.setAdapter(new ArrayAdapter<String>(ProblemSolutionActivity.this, android.R.layout.simple_list_item_1, itemStrings));
 
                 Toast.makeText(ProblemSolutionActivity.this, "Max profit will be " + S[noOfItems][capacity] + "\n" + Arrays.toString(selected), Toast.LENGTH_SHORT).show();
-            }
 
+                bundle.putIntArray(CommonConstants.WEIGHTS, weights);
+                bundle.putIntArray(CommonConstants.VALUES, values);
+                bundle.putIntArray(CommonConstants.SELECTED, selected);
+                bundle.putInt(CommonConstants.MAX_PROFIT, S[noOfItems][capacity]);
+                bundle.putInt(CommonConstants.CAPACITY, capacity);
+            }
         });
 
         addManualInputsButton.setOnClickListener(new View.OnClickListener() {
@@ -247,6 +260,12 @@ public class ProblemSolutionActivity extends AppCompatActivity {
                                 int[] selected = findItemsToTake(weights, noOfItems, capacity, S);
 
                                 Toast.makeText(ProblemSolutionActivity.this, "Max profit will be " + S[noOfItems][capacity] + "\n" + Arrays.toString(selected), Toast.LENGTH_SHORT).show();
+
+                                bundle.putIntArray(CommonConstants.WEIGHTS, weights);
+                                bundle.putIntArray(CommonConstants.VALUES, values);
+                                bundle.putIntArray(CommonConstants.SELECTED, selected);
+                                bundle.putInt(CommonConstants.MAX_PROFIT, S[noOfItems][capacity]);
+                                bundle.putInt(CommonConstants.CAPACITY, capacity);
                             }
                         }
                     });
@@ -261,6 +280,7 @@ public class ProblemSolutionActivity extends AppCompatActivity {
                 itemsListView.setAdapter(new ArrayAdapter<>(ProblemSolutionActivity.this, android.R.layout.simple_list_item_1, itemStrings));
                 generateRandomInputsButton.setVisibility(View.GONE);
                 addManualInputsButton.setVisibility(View.GONE);
+                showDetailResultsButton.setVisibility(View.VISIBLE);
                 capacityET.setEnabled(false);
                 itemsET.setEnabled(false);
             }
@@ -302,6 +322,12 @@ public class ProblemSolutionActivity extends AppCompatActivity {
         }
 
         return selected;
+    }
+
+    public void showDetailedResult(View view) {
+        Intent intent = new Intent(ProblemSolutionActivity.this, ResultsActivity.class);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 
     class Temp {
